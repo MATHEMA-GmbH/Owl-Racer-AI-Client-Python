@@ -38,9 +38,8 @@ ___
 
 ## How to Use the API
 ### Import
-In the beginning of your scripts import ```from serviceClient import service, commands```
-* **service** is the API that connects to the server. It implements the interface used by OpenAi Gym.
-* **commands** are helpers, which enable you to write the commands in text and not in numbers (e.g forward in place of 1)
+In the beginning of your scripts import ```from owlracer.env import Env```
+* **Env** is the API that connects to the server. It implements the interface used by OpenAi Gym.
 
 For an easy example have a look at samples/drive_circles.py, which can drive on map 0.
 For further information on the functions consult [OpenAi Gym](https://github.com/openai/gym/blob/master/docs/creating-environments.md).
