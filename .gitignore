@@ -1,0 +1,10 @@
+envRL
+envRay
+venv
+RL/models
+mlruns
+lib/build
+lib/dist
+*.egg-info
+.ipynb_checkpoints
+.idea/

@@ -1,0 +1,12 @@
+grpcio
+grpcio_tools
+numpy
+gym
+./lib/
+protobuf==3.14.0
+pandas
+scikit-learn
+skl2onnx
+tune-sklearn
+ray[tune]
+torch
