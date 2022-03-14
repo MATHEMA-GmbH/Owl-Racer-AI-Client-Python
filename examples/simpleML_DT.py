@@ -1,5 +1,6 @@
 import time
 import numpy as np
+import os
 
 # API import
 from owlracer import owlParser
@@ -80,8 +81,7 @@ class OwlRacerEnv(Owlracer_Env):
 
 @owlParser
 def mainLoop(args):
-
-    model_name = "./trainedModels/DT.onnx"
+    model_name = "../../../../../owlracer-ai-opensource-client-python/trainedModels/DT.onnx"
     model = onnx.load(model_name)
 
     # Check the model
