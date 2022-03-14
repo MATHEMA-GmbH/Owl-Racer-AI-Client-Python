@@ -42,7 +42,7 @@ def main():
 
 
     #moves the file in the right directory for the lib
-    move(renamed_grpc_file, current_dir + config_folder + os.sep + "grpcClient" + os.sep + "core_pb2_grpc.py")
+    #move(renamed_grpc_file, current_dir + config_folder + os.sep + "grpcClient" + os.sep + "core_pb2_grpc.py")
 
     #change dir and build pack
     os.chdir('./lib')

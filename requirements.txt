@@ -10,3 +10,4 @@ skl2onnx
 tune-sklearn
 ray[tune]
 torch
+onnxruntime
