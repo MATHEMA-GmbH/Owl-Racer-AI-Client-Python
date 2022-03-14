@@ -27,7 +27,7 @@ ___
 * Ubuntu user can use APT, but it should be preinstalled
 * Windows user are on their own
 3. Install an IDE of your choice
-4. **Optional** [Create](https://docs.python.org/3/tutorial/venv.html) a python virtual environment for this projekt
+4. **Optional** [Create](https://docs.python.org/3/tutorial/venv.html) a python virtual environment for this project
 
 ### Install the API
 1. Run ``` python3 protoC_script.py ```
