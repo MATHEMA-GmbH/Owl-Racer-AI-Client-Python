@@ -179,6 +179,6 @@ class Env(gym.Env):
         @return: recent session state
         """
 
-        session = sessiondata_to_session(self.Connector.get_session(self.session.id))
+        session = sessiondata_to_session(self.Connector.get_session(self.session.id), self.session)
         self.Connector.session = session
         return session

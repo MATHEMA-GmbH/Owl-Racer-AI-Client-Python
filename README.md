@@ -1,7 +1,9 @@
+![Logo](https://github.com/MATHEMA-GmbH/Owl-Racer-AI/blob/main/doc/owlracer-logo.png?raw=true)
+
 # The Python API
 ___
 ## Content
-This folder contains all files neccacery to build and compile a working Python Api 
+This folder contains all files neccacery to build and compile a working Python Api
 for the Owlracer server. Further the Folder includes easy to understand and some advanced examples.
 Displayed below the content is depicted.
 
