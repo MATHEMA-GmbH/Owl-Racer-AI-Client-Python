@@ -81,7 +81,9 @@ class OwlRacerEnv(Owlracer_Env):
 
 @owlParser
 def mainLoop(args):
-    model_name = "../../../../../owlracer-ai-opensource-client-python/trainedModels/DT.onnx"
+    model_name = "../trainedModels/DT.onnx"
+    this_dir = os.path.dirname(__file__)
+    model_name = os.path.join(this_dir, model_name)
     model = onnx.load(model_name)
 
     # Check the model
@@ -120,10 +122,10 @@ def mainLoop(args):
         # check if stuck
         if not env.is_moving():
             env.step(Command.accelerate)
-        print("Car Pos: {} {}, Vel: {} forward distance {}".format(step_result.position.x, step_result.position.y,
-                                                                   step_result.velocity, step_result.distance.front))
-        print("Time for executing inf {} or in ticks {}, and step {}".format(duration_inf, step_result.ticks - last_tick, duration_step))
-        print(step_result)
+        #print("Car Pos: {} {}, Vel: {} forward distance {}".format(step_result.position.x, step_result.position.y,
+        #                                                           step_result.velocity, step_result.distance.front))
+        #print("Time for executing inf {} or in ticks {}, and step {}".format(duration_inf, step_result.ticks - last_tick, duration_step))
+        #print(step_result)
 
 
 if __name__ == '__main__':

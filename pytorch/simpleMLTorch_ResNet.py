@@ -1,5 +1,6 @@
 import time
 import numpy as np
+import os
 import onnx
 import onnxruntime
 
@@ -83,7 +84,9 @@ class OwlRacerEnv(Env):
 def mainLoop(args):
     print(f"{args.session}")
 
-    model_name = "./trainedModels/ResNet.onnx"
+    model_name = "../trainedModels/ResNet.onnx"
+    this_dir = os.path.dirname(__file__)
+    model_name = os.path.join(this_dir, model_name)
     model = onnx.load(model_name)
 
     # Check the model
