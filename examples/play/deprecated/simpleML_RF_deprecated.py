@@ -12,14 +12,14 @@ import onnxruntime
 
 class OwlRacerEnv(Owlracer_Env):
     """
-    Wraps the Owlracer Env and returns the chosen variables
+    Wraps the Owlracer Env and returns the choosen variabels
     Args:
         service (class): OwlracerAPI env
     """
 
     def __init__(self, session):
 
-        super().__init__(carColor="#00bfff", carName="Dense Neural Network (Py)", session=session)
+        super().__init__(carColor="#42b3f5", carName="RandomForest_deprecated(Py)", session=session) #gameTime=20
         self.posX = 0
         self.posY = 0
         self.lastCommand = Command.idle
@@ -38,12 +38,12 @@ class OwlRacerEnv(Owlracer_Env):
         step_result = super().step(action)
 
         # shape of (x,1)
-        step = {'input': [[np.float32(step_result.velocity),
-                np.int64(step_result.distance.front),
-                np.int64(step_result.distance.frontLeft),
-                np.int64(step_result.distance.frontRight),
-                np.int64(step_result.distance.left),
-                np.int64(step_result.distance.right)]]}
+        step = {'Velocity':             np.array([[np.float32(step_result.velocity)]]),
+                'Distance_Front':       np.array([[np.int64(step_result.distance.front)]]),
+                'Distance_FrontLeft':   np.array([[np.int64(step_result.distance.frontLeft)]]),
+                'Distance_FrontRight':  np.array([[np.int64(step_result.distance.frontRight)]]),
+                'Distance_Left':        np.array([[np.int64(step_result.distance.left)]]),
+                'Distance_Right':       np.array([[np.int64(step_result.distance.right)]])}
 
         self.posDiffSq = max((self.posX - step_result.position.x) ** 2, (self.posY - step_result.position.y) ** 2)
         self.sameCommand = self.lastCommand == step_result.lastStepCommand
@@ -82,11 +82,10 @@ class OwlRacerEnv(Owlracer_Env):
 
 @owlParser
 def mainLoop(args):
-    print(f"{args.session}")
 
-    model_name = "../trainedModels/DNN.onnx"
+    model_name = "../../../trainedModels/deprecated-sklearn/RF.onnx"
     this_dir = os.path.dirname(__file__)
-    model_name = os.path.join(this_dir, model_name)
+    model_name = os.path.abspath(os.path.join(this_dir, model_name))
     model = onnx.load(model_name)
 
     # Check the model
@@ -105,7 +104,7 @@ def mainLoop(args):
     step, step_result = env.step(Command.idle)
 
     #play the game forever
-    while (True):
+    while True:
 
         # waiting for game start
         while env.isPrerace or env.isPaused:
@@ -114,7 +113,6 @@ def mainLoop(args):
 
         start_inf = time.time()
         action = session.run(None, step)[0][0]
-        action = np.argmax(action)
         duration_inf = time.time() - start_inf
 
         start_step = time.time()
@@ -125,14 +123,10 @@ def mainLoop(args):
         # check if stuck
         if not env.is_moving():
             env.step(Command.accelerate)
-
-        print("Car Pos: {} {}, Vel: {} forward distance {}".format(step_result.position.x, step_result.position.y,
-                                                                   step_result.velocity, step_result.distance.front))
-        print("Time for executing inf {} or in ticks {}, and step {}".format(duration_inf, step_result.ticks - last_tick, duration_step))
-
-
-        print(step_result)
-
+        #print("Car Pos: {} {}, Vel: {} forward distance {}".format(step_result.position.x, step_result.position.y,
+        #                                                           step_result.velocity, step_result.distance.front))
+        #print("Time for executing inf {} or in ticks {}, and step {}".format(duration_inf, step_result.ticks - last_tick, duration_step))
+        #print(step_result)
 
 
 if __name__ == '__main__':
