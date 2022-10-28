@@ -1,6 +1,7 @@
 import time
 import numpy as np
 import os
+import sys
 
 import yaml
 
@@ -20,9 +21,11 @@ class OwlRacerEnv(Owlracer_Env):
         service (class): OwlracerAPI env
     """
 
-    def __init__(self, session):
+    def __init__(self, channel=None, ip=None, port=None, spectator=False, carName="DNN_(Py)",
+                 carColor="#008800", sessionName="Default", gameTime = 50, gameTrack=2, session=None):
 
-        super().__init__(carColor="#592a1f", carName="DNN(Py)", session=session)
+        super().__init__(channel=channel, ip=ip, port=port, spectator=spectator, carName=carName, carColor=carColor,
+                         sessionName=sessionName, gameTime=gameTime, gameTrack=gameTrack, session=session)
         self.posX = 0
         self.posY = 0
         self.lastCommand = Command.idle
@@ -105,13 +108,23 @@ def get_action(action):
 
 @owlParser
 def mainLoop(args):
-    print(f"{args.session}")
+    args = vars(args)
+    print(f"{args}")
+
+    if "model" not in args.keys():
+        print("error, model not selected")
+        sys.exit(1)
 
     this_dir = os.path.dirname(__file__)
 
-    model_name = "../../trainedModels/DNN-rename.onnx"
-    model_name = os.path.abspath(os.path.join(this_dir, model_name))
+    print(args["model"].replace("\\", "/"))
+
+    model_name = os.path.abspath(os.path.join(this_dir, args["model"].replace("\\", "/")))
+    print("hello abs model path:")
+    print(model_name)
     model = onnx.load(model_name)
+
+    args.pop("model")
 
     os.path.join(os.path.dirname(model_name), "labelmap.yaml")
     label_map_path = os.path.join(os.path.dirname(model_name), "labelmap.yaml")
@@ -129,7 +142,7 @@ def mainLoop(args):
     session = onnxruntime.InferenceSession(model_name)
 
     #Start owlracer Env
-    env = OwlRacerEnv(session=args.session)
+    env = OwlRacerEnv(**args)
 
     step, step_result = env.step(Command.idle)
 

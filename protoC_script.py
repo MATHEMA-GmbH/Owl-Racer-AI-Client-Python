@@ -3,6 +3,9 @@ from shutil import move
 
 def main():
 
+    # update pip
+    os.system("python -m pip install --upgrade pip")
+
     # Compile .proto to python files
 
     # install requirements

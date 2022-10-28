@@ -23,6 +23,12 @@ PARSER.add_argument('--spectator',  action="store_true",
                     help='without interaction')
 PARSER.add_argument('--session',  type=str, default=None,
                     help='session ID to join, if empty it will join the first session')
+PARSER.add_argument('--carColor',  type=str, default=None,
+                    help='color of the racecar')
+PARSER.add_argument('--carName',  type=str, default=None,
+                    help='displayed name of the racecar')
+PARSER.add_argument('--model',  type=str, default=None,
+                    help='chosen trained model')
 
 # Argparse Decorator
 def owlParser(func):
