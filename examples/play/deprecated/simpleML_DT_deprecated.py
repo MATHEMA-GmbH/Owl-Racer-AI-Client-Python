@@ -9,6 +9,7 @@ from owlracer.services import Command
 import onnx
 import onnxruntime
 
+
 class OwlRacerEnv(Owlracer_Env):
     """
     Wraps the Owlracer Env and returns the choosen variabels
@@ -18,7 +19,7 @@ class OwlRacerEnv(Owlracer_Env):
 
     def __init__(self, session):
 
-        super().__init__(carColor="#a8a60d", carName="Decision Tree (Py)", session=session) #gameTime=20
+        super().__init__(carColor="#a8a60d", carName="DecisionTree_deprecated(Py)", session=session) #gameTime=20
         self.posX = 0
         self.posY = 0
         self.lastCommand = Command.idle
@@ -36,7 +37,7 @@ class OwlRacerEnv(Owlracer_Env):
         """
         step_result = super().step(action)
 
-        # shape of (x,1)
+        #shape of (x,1)
         step = {'Velocity':             np.array([[np.float32(step_result.velocity)]]),
                 'Distance_Front':       np.array([[np.int64(step_result.distance.front)]]),
                 'Distance_FrontLeft':   np.array([[np.int64(step_result.distance.frontLeft)]]),
@@ -81,9 +82,9 @@ class OwlRacerEnv(Owlracer_Env):
 
 @owlParser
 def mainLoop(args):
-    model_name = "../trainedModels/DT.onnx"
+    model_name = "../../../trainedModels/deprecated-sklearn/DT.onnx"
     this_dir = os.path.dirname(__file__)
-    model_name = os.path.join(this_dir, model_name)
+    model_name = os.path.abspath(os.path.join(this_dir, model_name))
     model = onnx.load(model_name)
 
     # Check the model
@@ -103,7 +104,7 @@ def mainLoop(args):
 
     # play the game forever
 
-    while(True):
+    while True:
 
         # waiting for game start
         while env.isPrerace or env.isPaused:

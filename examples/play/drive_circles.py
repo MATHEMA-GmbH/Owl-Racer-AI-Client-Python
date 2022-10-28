@@ -8,7 +8,8 @@ from owlracer.services import Command
 @owlParser
 def main_loop(args):
   
-    env = Owlracer_Env(ip=args.ip, port=args.port, spectator=args.spectator, session="", gameTrack=1, carColor="#0000FF")
+    env = Owlracer_Env(ip=args.ip, port=args.port, spectator=args.spectator, session="", gameTrack=1,
+                       carColor="#c78422", carName="Drive_Circles_(Py)")
     
     step_result = env.step(0)
 

@@ -8,3 +8,8 @@ lib/dist
 *.egg-info
 .ipynb_checkpoints
 .idea/
+hidden/*
+/configuration/.env
+/train_pytorch_results/
+/train_hyperopt_results/
+**/example.log
