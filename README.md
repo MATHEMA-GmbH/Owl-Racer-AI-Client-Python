@@ -16,8 +16,8 @@ Displayed below the content is depicted.
 ├── lib (Package for building the python API)         
 ├── trainedModels (trained models with different algorithms and frameworks, ready to be executed)
 ├── protoC_script.py (Script for updating the protobuf files and installing dependencies)    
-├── requirements.txt (Packages needed, will be updated for new version)    
-└── requirements_train.txt (Packages needed for training)
+├── requirements.txt (Packages needed)    
+└── requirements_train.txt (Additional Packages needed for training sklearn and pytorch)
 ```
 ___
 ## Setup
@@ -26,7 +26,7 @@ ___
 1. [Install](https://www.youtube.com/watch?v=dZh_ps8gKgs) protoC
 * Ubuntu user can use APT
 * Windows user might dowload the latest releas from the [Reposetory](https://github.com/protocolbuffers/protobuf/releases) and add it to the path
-2. Install Python (for playing > 3.6, for training 3.9 is recommended)
+2. Install Python (3.9 is required)
 * Ubuntu user can use APT, but it should be preinstalled
 * Windows user are on their own
 3. Install an IDE of your choice
