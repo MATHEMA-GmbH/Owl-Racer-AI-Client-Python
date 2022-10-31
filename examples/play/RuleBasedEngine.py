@@ -56,6 +56,7 @@ def calculate_action(step_result, list):
 
 @owlParser
 def main_loop(args):
+    print(args.session)
     env = Owlracer_Env(ip=args.ip, port=args.port, spectator=args.spectator, session=args.session, carName="Rule-based (Py)", carColor="#07f036")
     step_result = env.step(0)
 

@@ -18,7 +18,7 @@ class Env(gym.Env):
     and car after init.
     """
 
-    def __init__(self, channel=None, ip='localhost', port='6003', spectator=False, carName="Default", carColor="#008800", sessionName="",
+    def __init__(self, channel=None, ip='localhost', port='6003', spectator=False, carName="blubber", carColor="#008800", sessionName="",
                  gameTime = 50, gameTrack=2, session=None):
         """Environment class using openAI gym interface. This class connects
         the client with the grpc _service. Each object keeps their own connection
