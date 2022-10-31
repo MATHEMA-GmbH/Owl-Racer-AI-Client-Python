@@ -13,3 +13,4 @@ hidden/*
 /train_pytorch_results/
 /train_hyperopt_results/
 **/example.log
+/lib/src/owlracer/core_pb2_grpc.py
