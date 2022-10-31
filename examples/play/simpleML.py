@@ -21,8 +21,8 @@ class OwlRacerEnv(Owlracer_Env):
         service (class): OwlracerAPI env
     """
 
-    def __init__(self, channel=None, ip=None, port=None, spectator=False, carName="DNN_(Py)",
-                 carColor="#008800", sessionName="Default", gameTime = 50, gameTrack=2, session=None):
+    def __init__(self, channel=None, ip=None, port=None, spectator=False, carName="model_(Py)",
+                 carColor="#ba0f0f", sessionName="Default", gameTime = 50, gameTrack=2, session=None):
 
         super().__init__(channel=channel, ip=ip, port=port, spectator=spectator, carName=carName, carColor=carColor,
                          sessionName=sessionName, gameTime=gameTime, gameTrack=gameTrack, session=session)
@@ -109,7 +109,6 @@ def get_action(action):
 @owlParser
 def mainLoop(args):
     args = vars(args)
-    print(f"{args}")
 
     if "model" not in args.keys():
         print("error, model not selected")
@@ -120,11 +119,17 @@ def mainLoop(args):
     print(args["model"].replace("\\", "/"))
 
     model_name = os.path.abspath(os.path.join(this_dir, args["model"].replace("\\", "/")))
-    print("hello abs model path:")
-    print(model_name)
     model = onnx.load(model_name)
 
+    remove = []
     args.pop("model")
+    for key in args.keys():
+        if args[key] is None:
+            remove.append(key)
+
+    for item in remove:
+        args.pop(item)
+    print(args)
 
     os.path.join(os.path.dirname(model_name), "labelmap.yaml")
     label_map_path = os.path.join(os.path.dirname(model_name), "labelmap.yaml")
