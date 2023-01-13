@@ -6,7 +6,7 @@ import yaml
 
 # API import
 from owlracer import owlParser
-from owlracer.env import Env as Owlracer_Env
+from owlracer.env import CarEnv as Owlracer_Env
 from owlracer.services import Command
 import onnx
 import onnxruntime

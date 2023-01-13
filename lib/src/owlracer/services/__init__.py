@@ -11,7 +11,7 @@ class Command(IntEnum):
     idle = 0
     accelerate = 1
     decelerate = 2
-    left = 3
-    right = 4
-    spinLeft = 5
-    spinRight = 6
+    accelerateLeft = 3
+    accelerateRight = 4
+    turnLeft = 5
+    turnRight = 6

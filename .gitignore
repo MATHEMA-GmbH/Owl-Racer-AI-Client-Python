@@ -14,3 +14,13 @@ hidden/*
 /train_hyperopt_results/
 **/example.log
 /lib/src/owlracer/core_pb2_grpc.py
+/lib/src/owlracer/grpcClient/core_pb2_grpc.py
+/trainedModels/new-data
+.vscode
+.env
+__pycache__
+/trainedModels/new-data-2/
+/trainedModels/xgboost/
+/examples/train/RL/model_output/
+
+

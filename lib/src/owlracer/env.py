@@ -1,25 +1,33 @@
 """
 Environment using gym interface, handling the grpc conection and car creation.
 """
+import math
+from typing import Optional
 
 import gym
 from owlracer.grpcClient.grpcConnector import GrpcConnector
 from grpcClient.converter import racecardata_to_car, sessiondata_to_session
 import logging
+import numpy as np
 
 # create logger
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.DEBUG)
 
 
-class Env(gym.Env):
+class CarEnv(gym.Env):
+    """Custom Environment that follows gym interface"""
+    metadata = {'render.modes': ['human']}
+
     """Environment class using openAI gym interface. This class connects
     the client with the grpc _service. Each object keeps their own connection
     and car after init.
     """
 
-    def __init__(self, channel=None, ip='localhost', port='6003', spectator=False, carName="blubber", carColor="#008800", sessionName="",
-                 gameTime = 50, gameTrack=2, session=None):
+    def __init__(self, channel=None, ip='localhost', port='6003', spectator=False, carName="Default",
+                 carColor="#008800", sessionName="",
+                 gameTime=50, gameTrack=2, session=None):
+        super(CarEnv, self).__init__()
         """Environment class using openAI gym interface. This class connects
         the client with the grpc _service. Each object keeps their own connection
         and car after init.
@@ -37,12 +45,17 @@ class Env(gym.Env):
         self.Connector.open_channel()
         self.Connector.create_service()
         self.updateAllSessions()
-        
+        self.action_space = gym.spaces.Discrete(7, start=1)
+        self.observation_space = gym.spaces.Box(0.0, 1000.0, (7,), np.float32)
+        self.posX = 0
+        self.posY = 0
+
         # session join logic
 
         if session is None:
             # create new session if none defined
-            self.session = sessiondata_to_session(self.Connector.create_session(trackNr=gameTrack, gameTime=gameTime, sessionName=sessionName))
+            self.session = sessiondata_to_session(
+                self.Connector.create_session(trackNr=gameTrack, gameTime=gameTime, sessionName=sessionName))
         else:
             # "" is default value from the arparser to enforce first session if none is defined
             if session == "":
@@ -62,6 +75,7 @@ class Env(gym.Env):
 
         # creating new raceCar
         self.car = self.create_car(car_name=carName, car_color=carColor)
+        self.observation_data = self.transform_car_object_to_observation_data(self.car)
 
         logger.info('Created Env Successfully with Session {} and Car {}'.format(self.car.sessionID, self.car.ID))
 
@@ -70,6 +84,7 @@ class Env(gym.Env):
         """
         if not self.spectator and self.Connector.ready:
             self.Connector.destroy_car(self.car.ID)
+
         self.Connector.__del__()
         logger.info('Deleted Env Successfully')
 
@@ -91,15 +106,34 @@ class Env(gym.Env):
         @param action: defined action
         @return: new state of the RaceCar
         """
-        return racecardata_to_car(self.Connector.step(action, self.car.ID))
+        step_result = self.Connector.step(action, self.car.ID)
+        self.car = racecardata_to_car(step_result)
+        info = {"carId": self.car.ID}
 
-    def reset(self):
+        return self.transform_car_object_to_observation_data(step_result), \
+               self.car.scoreStep, \
+               self.car.isCrashed,\
+               info
+
+    def is_moving(self):
+        posDiffSq = math.sqrt((self.posX - self.car.position.x) ** 2 + (self.posY - self.car.position.y) ** 2)
+        self.posX = self.car.position.x
+        self.posY = self.car.position.y
+
+        if not posDiffSq > 0 and self.car.velocity < 0.1:
+            return False
+
+        return True
+
+    def reset(self, seed: Optional[int] = None, options=None):
         """
         Resets the RaceCar to the Respawn point defined by the server
         @return: new state of the RaceCar
         """
-        return racecardata_to_car(self.Connector.reset(self.car.ID))
+        super().reset(seed=seed)
+        self.car = racecardata_to_car(self.Connector.reset(self.car.ID))
 
+        return self.transform_car_object_to_observation_data(self.car)
 
     def render(self, mode='human'):
         """NOT IMPLEMENTED YET
@@ -182,3 +216,16 @@ class Env(gym.Env):
         session = sessiondata_to_session(self.Connector.get_session(self.session.id), self.session)
         self.Connector.session = session
         return session
+
+    def transform_car_object_to_observation_data(self, car):
+        acceleration = car.acceleration
+        velocity = car.velocity
+        distance_front = car.distance.front
+        distance_front_left = car.distance.frontLeft
+        distance_front_right = car.distance.frontRight
+        distance_left = car.distance.left
+        distance_right = car.distance.right
+        observation_data = np.array(
+            [acceleration, velocity, distance_front, distance_front_left, distance_front_right, distance_left,
+             distance_right], dtype=np.float32)
+        return observation_data

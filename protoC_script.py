@@ -1,15 +1,15 @@
 import os
 from shutil import move
+import argparse
+import sys
 
-def main():
+
+def main(arguments):
 
     # update pip
     os.system("python -m pip install --upgrade pip")
 
     # Compile .proto to python files
-
-    # install requirements
-    os.system("python -m pip install -r ./requirements.txt")
 
     current_dir = os.getcwd()
 
@@ -52,9 +52,25 @@ def main():
     os.system("python -m build")
     os.chdir('../')
 
-    #install requirements
-    os.system("python -m pip install -r ./requirements.txt")
+    #install requirements depending on arguments
+    if arguments.dev:
+        os.system("python -m pip install -r ./requirements_dev.txt")
+    else:
+        os.system("python -m pip install -r ./requirements.txt")
+
+def parse_arguments(args: list[str]):
+    parser = argparse.ArgumentParser(
+            description="Decide which requirements are to be installed",
+        )
+    parser.add_argument(
+        "--dev",
+        action="store_true",
+        help="Install development requirements for training models",
+        default=False
+    )
+    return parser.parse_args(args)
 
 
 if __name__ == '__main__':
-    main()
+    arguments = parse_arguments(sys.argv[1:])
+    main(arguments)
