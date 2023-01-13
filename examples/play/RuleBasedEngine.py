@@ -1,13 +1,15 @@
 import time
-from owlracer.env import Env as Owlracer_Env
+from owlracer.env import CarEnv
 from owlracer import owlParser
+from owlracer.services import Command
 
 
-def calculate_action(step_result, list):
-    distance_right = step_result.distance.right
-    distance_front_right = step_result.distance.frontRight
-    distance_left = step_result.distance.left
-    distance_front_left = step_result.distance.frontLeft
+def calculate_action(observation, list):
+    distance_right = observation[6]
+    distance_front_right = observation[4]
+    distance_left = observation[5]
+    distance_front_left = observation[3]
+    distance_front = observation[2]
 
     if list["fixed_left"] > 0:
         list["fixed_left"] = list["fixed_left"]-1
@@ -38,7 +40,7 @@ def calculate_action(step_result, list):
         else:
             ratio = float(distance_front_right)/distance_front_left
 
-        if step_result.distance.front >= 50:
+        if distance_front >= 50:
             if ratio < 1:
                 return 3
             elif ratio > 1:
@@ -56,9 +58,13 @@ def calculate_action(step_result, list):
 
 @owlParser
 def main_loop(args):
-    print(args.session)
-    env = Owlracer_Env(ip=args.ip, port=args.port, spectator=args.spectator, session=args.session, carName="Rule-based (Py)", carColor="#07f036")
-    step_result = env.step(0)
+    args = vars(args)
+    args.pop("carName")
+    args.pop("carColor")
+    args.pop("model")
+
+    env = CarEnv(**args, carName="Rule-based (Py)", carColor="#07f036")
+    observation, reward, terminated, info = env.step(Command.idle)
 
 
     list ={
@@ -73,12 +79,10 @@ def main_loop(args):
             env.updateSession()
             time.sleep(0.1)
 
-        action = calculate_action(step_result, list)
+        action = calculate_action(observation, list)
 
-        step_result = env.step(action)
+        observation, reward, terminated, info = env.step(action)
 
-        print("Car Left/right: {} {}, Vel: {} forward distance {}".format(step_result.distance.left, step_result.distance.right,
-                                                                   step_result.velocity, step_result.distance.front))
         # sleep for human
         time.sleep(0.01)
 

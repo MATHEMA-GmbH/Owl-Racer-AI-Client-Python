@@ -6,14 +6,14 @@ import yaml
 
 # API import
 from owlracer import owlParser
-from owlracer.env import Env as Owlracer_Env
+from owlracer.env import CarEnv
 from owlracer.services import Command
 import onnx
 import onnxruntime
 
 
 
-class OwlRacerEnv(Owlracer_Env):
+class OwlRacerEnv(CarEnv):
     """
     Wraps the Owlracer Env and returns the chosen variables
     Args:
@@ -85,7 +85,10 @@ class OwlRacerEnv(Owlracer_Env):
 
 @owlParser
 def mainLoop(args):
-    print(f"{args.session}")
+    args = vars(args)
+
+    if "model" in args.keys():
+        args.pop("model")
 
     this_dir = os.path.dirname(__file__)
 
@@ -108,7 +111,8 @@ def mainLoop(args):
     session = onnxruntime.InferenceSession(model_name)
 
     #Start owlracer Env
-    env = OwlRacerEnv(session=args.session)
+    env = CarEnv(**args)
+    #env = OwlRacerEnv(session=args.session)
 
     step, step_result = env.step(Command.idle)
 

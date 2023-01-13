@@ -7,92 +7,10 @@ import yaml
 
 # API import
 from owlracer import owlParser
-from owlracer.env import Env as Owlracer_Env
+from owlracer.env import CarEnv
 from owlracer.services import Command
 import onnx
 import onnxruntime
-
-
-
-class OwlRacerEnv(Owlracer_Env):
-    """
-    Wraps the Owlracer Env and returns the chosen variables
-    Args:
-        service (class): OwlracerAPI env
-    """
-
-    def __init__(self, channel=None, ip=None, port=None, spectator=False, carName="model_(Py)",
-                 carColor="#ba0f0f", sessionName="Default", gameTime = 50, gameTrack=2, session=None):
-
-        super().__init__(channel=channel, ip=ip, port=port, spectator=spectator, carName=carName, carColor=carColor,
-                         sessionName=sessionName, gameTime=gameTime, gameTrack=gameTrack, session=session)
-        self.posX = 0
-        self.posY = 0
-        self.lastCommand = Command.idle
-        #just larger than 1
-        self.posDiffSq = float('inf')
-
-    def step(self, action):
-        """
-        Commit Step with given action
-        Args:
-            action (int): action to performe
-
-        Returns:
-            tuple: next state
-        """
-        step_result = super().step(action)
-
-        # shape of (x,1)
-        step = {'input': [[np.float32(step_result.velocity),
-                np.int64(step_result.distance.front),
-                np.int64(step_result.distance.frontLeft),
-                np.int64(step_result.distance.frontRight),
-                np.int64(step_result.distance.left),
-                np.int64(step_result.distance.right)]]}
-
-        self.posDiffSq = max((self.posX - step_result.position.x) ** 2, (self.posY - step_result.position.y) ** 2)
-        self.sameCommand = self.lastCommand == step_result.lastStepCommand
-
-        self.posX = step_result.position.x
-        self.posY = step_result.position.y
-        self.lastCommand = step_result.lastStepCommand
-
-        return [step, step_result]
-
-    def reset(self):
-        """
-        Resets the RaceCar to the server Respawn point
-        Returns:
-            tuple: next state
-        """
-
-        step_result = super().reset()
-
-        # # shape of (x,1)
-        # step = {'Velocity': np.array([[np.float32(step_result.velocity)]]),
-        #         'Distance_Front': np.array([[np.int64(step_result.distance.front)]]),
-        #         'Distance_FrontLeft': np.array([[np.int64(step_result.distance.frontLeft)]]),
-        #         'Distance_FrontRight': np.array([[np.int64(step_result.distance.frontRight)]]),
-        #         'Distance_Left': np.array([[np.int64(step_result.distance.left)]]),
-        #         'Distance_Right': np.array([[np.int64(step_result.distance.right)]])}
-
-        step = {'input': [[np.float32(step_result.velocity),
-                           np.int64(step_result.distance.front),
-                           np.int64(step_result.distance.frontLeft),
-                           np.int64(step_result.distance.frontRight),
-                           np.int64(step_result.distance.left),
-                           np.int64(step_result.distance.right)]]}
-
-
-        return [step, step_result]
-
-    def is_moving(self):
-
-        if self.posDiffSq < 1 and self.car.velocity < 0.1:
-            return False
-
-        return True
 
 
 def get_action(action):
@@ -105,6 +23,11 @@ def get_action(action):
         return [0]
     else:
         return action[0]
+
+
+def get_transform_observation(observation):
+    return {'input': [observation[1:]]}
+
 
 @owlParser
 def mainLoop(args):
@@ -131,7 +54,6 @@ def mainLoop(args):
         args.pop(item)
     print(args)
 
-    os.path.join(os.path.dirname(model_name), "labelmap.yaml")
     label_map_path = os.path.join(os.path.dirname(model_name), "labelmap.yaml")
 
     idx2class = yaml.safe_load(open(label_map_path))["classes"]
@@ -147,39 +69,28 @@ def mainLoop(args):
     session = onnxruntime.InferenceSession(model_name)
 
     #Start owlracer Env
-    env = OwlRacerEnv(**args)
-
-    step, step_result = env.step(Command.idle)
+    env = CarEnv(**args)
+    observation, reward, terminated, info = env.step(Command.idle)
+    step = get_transform_observation(observation)
 
     #play the game forever
-    while (True):
+    while True:
 
         # waiting for game start
         while env.isPrerace or env.isPaused:
             env.updateSession()
             time.sleep(0.1)
 
-        #start_inf = time.time()
         action = session.run(None, step)
         action = get_action(action)
         action = idx2class[np.argmax(action)]
-        #duration_inf = time.time() - start_inf
-        start_step = time.time()
-        #last_tick = step_result.ticks
-        step, step_result = env.step(action)
-        #duration_step = time.time() - start_step
 
-        # check if stuck
-        if not env.is_moving():
-            env.step(Command.accelerate)
+        observation, reward, terminated, info = env.step(action)
+        step = get_transform_observation(observation)
 
-        # print("Car Pos: {} {}, Vel: {} forward distance {}".format(step_result.position.x, step_result.position.y,
-        #                                                            step_result.velocity, step_result.distance.front))
-        # print("Time for executing inf {} or in ticks {}, and step {}".format(duration_inf, step_result.ticks - last_tick, duration_step))
-        #
-        #
-        # print(step_result)
-
+        # # check if stuck (model should learn this by itself)
+        # if not env.is_moving():
+        #     env.step(Command.accelerate)
 
 
 if __name__ == '__main__':

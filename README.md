@@ -33,7 +33,7 @@ ___
 4. **Optional** [Create](https://docs.python.org/3/tutorial/venv.html) a python virtual environment for this project
 
 ### Install the API
-1. Run ``` python3 protoC_script.py ```
+1. Run ``` python3 protoC_script.py [--dev] ```
 2. Fix errors that arise during script execution (ignore tensorflow warnings)
 3. You are ready to go
 
@@ -66,3 +66,9 @@ During the training metrics, artifacts and models will be logged with mlflow. Yo
 * Preprocessing can be adapted in `examples/train/owlracer_dataset.py`.
 * Use a labelmap such as `examples/train/labelmap.yaml` to map the classes and verify consistency of the stepcommands between different frameworks.
 * The models need to be exported to ONNX to be able to be executed with all of the provided clients. Therefore, it is in some cases necessary to adapt the exported onnx outputs to provide compatibility, e.g. `examples/train/train_pytorch.py`
+
+## ONNX Export
+necessary output nodes are:
+
+* output_probability
+* output_label

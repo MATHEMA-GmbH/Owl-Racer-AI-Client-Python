@@ -1,0 +1,29 @@
+# python 3.9
+numpy==1.23.4
+pandas==1.5.1
+onnxruntime==1.13.1
+protobuf==3.20.1
+onnx==1.12.0
+grpcio==1.51.1
+grpcio_tools==1.48.2
+gym==0.26.2
+PyYaml==6.0
+./lib/
+
+# additional for sklearn, pytorch, keras
+scikit-learn==1.1.1
+skl2onnx==1.13
+tune-sklearn==0.4.5
+ray[tune]==2.2.2
+torch==1.13.1
+ConfigSpace==0.6.1
+mlflow==2.1.1
+matplotlib==3.6.3
+boto3==1.26.49
+pydantic==1.10.4
+dvc==2.41.1
+seaborn==0.12.2
+sclblonnx==0.1.14
+keras==2.9.0
+keras-rl2==1.0.5
+
