@@ -29,7 +29,7 @@ def main(arguments):
         "-I " + src_dir + os.sep + "Protobuf " +
         src_dir + os.sep + "Protobuf" + os.sep + "matlabs.owlracer.core.proto "
         "--python_out=" + current_dir + config_folder +
-        " --grpc_python_out=" + current_dir + config_folder )
+        " --grpc_python_out=" + current_dir + config_folder)
 
     
     #Rename the exported file to the right format
@@ -43,9 +43,11 @@ def main(arguments):
     if os.path.exists(grpc_file):
         os.rename(grpc_file, renamed_grpc_file)
 
-
-    #moves the file in the right directory for the lib
-    #move(renamed_grpc_file, current_dir + config_folder + os.sep + "grpcClient" + os.sep + "core_pb2_grpc.py")
+    try:
+        #moves the file in the right directory for the lib
+        move(renamed_grpc_file, current_dir + config_folder + os.sep + "grpcClient" + os.sep + "core_pb2_grpc.py")
+    except Exception as ex:
+        print(ex)
 
     #change dir and build pack
     os.chdir('./lib')
@@ -57,6 +59,7 @@ def main(arguments):
         os.system("python -m pip install -r ./requirements_dev.txt")
     else:
         os.system("python -m pip install -r ./requirements.txt")
+
 
 def parse_arguments(args: list[str]):
     parser = argparse.ArgumentParser(
