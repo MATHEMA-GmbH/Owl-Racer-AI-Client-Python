@@ -19,7 +19,7 @@ class OwlRacerEnv(CarEnv):
 
     def __init__(self, session):
 
-        super().__init__(carColor="#a8a60d", carName="DecisionTree_deprecated(Py)", session=session) #gameTime=20
+        super().__init__(carColor="#a8a60d", carName="KNN_deprecated(Py)", session=session) #gameTime=20
         self.posX = 0
         self.posY = 0
         self.lastCommand = Command.idle
@@ -50,7 +50,7 @@ class OwlRacerEnv(CarEnv):
 
 @owlParser
 def mainLoop(args):
-    model_name = "../../../trainedModels/deprecated-sklearn/DT.onnx"
+    model_name = "../../../trainedModels/deprecated-sklearn/KNN.onnx"
     this_dir = os.path.dirname(__file__)
     model_name = os.path.abspath(os.path.join(this_dir, model_name))
     model = onnx.load(model_name)
