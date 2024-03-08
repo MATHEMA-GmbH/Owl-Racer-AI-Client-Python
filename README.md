@@ -59,7 +59,8 @@ The service can be used with different examples from OpenAi Gym in the near futu
 ## Train models
 In the directory `examples/train` you can find many examples how you can train models with pytorch, sklearn and 
 hyperoptimization. Root directory: owlracer-ai-opensource-client-python.
-During the training metrics, artifacts and models will be logged with mlflow. You can add a connection for mlflow server.
+During the training metrics, artifacts and models will be logged with mlflow. You can add a connection for mlflow server via the option `--server-log`. Parameters for the server (MLFLOW_S3_ENDPOINT_URL, AWS_ACCESS_KEY_ID, AWS_SECRET_ACCESS_KEY, MLFLOW_PROJECT_ENV, REMOTE_SERVER_URI) must be specified in `.env`-File in root directory.
+If the `--server-log` option is left out, logging will happen locally. The results can be found in the `mlruns`-subfolders or alternatively can be retrieved on a local mlflow-Server that can be opened with `mlflow ui`.
 
 
 * (Hyper-)parameters need to be set in `examples/train/params.yaml`. 

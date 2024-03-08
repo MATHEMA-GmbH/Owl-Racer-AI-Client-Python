@@ -5,8 +5,7 @@ train-sklearn:
     criterion: entropy
     max_depth: 600
     min_samples_split: 5
-  target_opset: 19
-  #target_opset: 16
+  target_opset: 16
 
 train-pytorch:
   model_type: NN
@@ -14,9 +13,9 @@ train-pytorch:
   batch_size: 16
   learning_rate: 1e-6
   epochs: 3
-  target_opset: 19
+  target_opset: 16
   #in_channels: 16
   #out_channels: 16
 
 hyperopt:
-  target_opset: 19
+  target_opset: 16

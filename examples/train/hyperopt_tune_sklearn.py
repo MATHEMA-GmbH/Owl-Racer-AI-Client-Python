@@ -18,18 +18,20 @@ from sklearn.preprocessing import StandardScaler
 from sklearn.tree import DecisionTreeClassifier
 from sklearn.decomposition import PCA
 
+from sklearn.model_selection import GridSearchCV
+
 from skl2onnx.common.data_types import StringTensorType, Int64TensorType, FloatTensorType
 from skl2onnx import convert_sklearn, to_onnx
 
-from tune_sklearn import TuneGridSearchCV
+# from tune_sklearn import TuneGridSearchCV
 
-from ray.tune.integration.mlflow import mlflow_mixin
+# from ray.tune.integration.mlflow import mlflow_mixin
 import mlflow
 
 from owlracer_dataset import OwlracerPreprocessor
 
 
-def prase_args():
+def parse_args():
     parser = argparse.ArgumentParser()
     parser.add_argument("--data", type=str, help="set the path of the data", required=True)
     parser.add_argument("--experiment", type=str, help="set mlflow experiment", required=True)
@@ -86,7 +88,7 @@ def get_features():
 
     return X_train, X_test, Y_train, Y_test
 
-@mlflow_mixin
+# @mlflow_mixin
 def fit_model(model, X_train, Y_train, experiment):
     set_mlflow_tracking(experiment)
     mlflow.autolog(log_input_examples=True)
@@ -111,12 +113,18 @@ def train_models(mlflow_experiment):
 
         print(selected_model)
         # https://docs.ray.io/en/master/tune/tutorials/tune-sklearn.html
-        trained_model = TuneGridSearchCV(
+        # trained_model = TuneGridSearchCV(
+        #     estimator=model.get("classifier"),
+        #     param_grid=model.get("parameter_grid"),
+        #     scoring="jaccard_weighted",
+        #     name=selected_model,
+        #     local_dir=local_dir
+        # )
+
+        trained_model = GridSearchCV(
             estimator=model.get("classifier"),
             param_grid=model.get("parameter_grid"),
-            scoring="jaccard_weighted",
-            name=selected_model,
-            local_dir=local_dir
+            scoring="jaccard_weighted"
         )
 
         print("start training")
@@ -164,7 +172,7 @@ def save_model(file_name, model):
 
 
 if __name__ == '__main__':
-    args = prase_args()
+    args = parse_args()
     data_path = args.data
 
     params = yaml.safe_load(open("examples/train/params.yaml"))["hyperopt"]

@@ -35,7 +35,8 @@ class OwlracerPreprocessor(Dataset):
         if drop_columns is None:
             drop_columns = ["Id", "IsCrashed", "MaxVelocity", "Position.X", "Position.Y",
                             "PreviousCheckpoint", "Rotation", "Score", "ScoreOverall", "Ticks"]
-        self.data["Velocity"].replace(",", ".", inplace=True, regex=True)
+        # self.data["Velocity"].replace(",", ".", inplace=True, regex=True)
+        self.data["Velocity"] = self.data["Velocity"].replace(",", ".", regex=True)
         self.data["Velocity"] = pd.to_numeric(self.data["Velocity"])
 
         # drop unused tables
@@ -43,7 +44,7 @@ class OwlracerPreprocessor(Dataset):
         self.data.drop(self.data.tail(1).index, inplace=True)
 
     def replace_stepcommand_labelmap(self, class2idx: dict):
-        self.data["stepCommand"].replace(class2idx, inplace=True)
+        self.data["stepCommand"] = self.data["stepCommand"].replace(class2idx)
 
     def train_test_split(self, fixed_random_state: int = 444, test_size: float = 0.3):
         # generate data X and labels y

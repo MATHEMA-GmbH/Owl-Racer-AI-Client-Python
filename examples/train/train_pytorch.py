@@ -10,7 +10,7 @@ import torch
 from torch.utils.data import DataLoader
 import mlflow
 
-import sclblonnx as so
+#import sclblonnx as so
 import onnx
 
 from owlracer_dataset import OwlracerDataset, OwlracerPreprocessor
@@ -19,7 +19,7 @@ from ModelPytorch.ResNet import ResNet
 from ModelPytorch.Exporter import ExporterToOnnx
 
 
-def prase_args():
+def parse_args():
     parser = argparse.ArgumentParser()
     parser.add_argument("--data", type=str, help="set the path of the data", required=True)
     parser.add_argument("--experiment", type=str, help="set mlflow experiment", required=True)
@@ -83,7 +83,8 @@ def mainLoop():
     test_loop(test_loader, model, loss)
 
     save_model(model)
-    transform_onnx()
+    # 23.02.2024: Das hier auskommentiert:
+    #transform_onnx()
     mlflow.end_run()
 
 
@@ -179,7 +180,7 @@ def transform_onnx():
 
 
 if __name__ == '__main__':
-    args = prase_args()
+    args = parse_args()
     data_path = args.data
 
     class2idx = yaml.safe_load(open("examples/train/labelmap.yaml"))["class2idx"]
