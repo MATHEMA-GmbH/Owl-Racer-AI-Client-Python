@@ -59,8 +59,12 @@ The service can be used with different examples from OpenAi Gym in the near futu
 ## Train models
 In the directory `examples/train` you can find many examples how you can train models with pytorch, sklearn and 
 hyperoptimization. Root directory: owlracer-ai-opensource-client-python.
-During the training metrics, artifacts and models will be logged with mlflow. You can add a connection for mlflow server via the option `--server-log`. Parameters for the server (MLFLOW_S3_ENDPOINT_URL, AWS_ACCESS_KEY_ID, AWS_SECRET_ACCESS_KEY, MLFLOW_PROJECT_ENV, REMOTE_SERVER_URI) must be specified in `.env`-File in root directory.
-If the `--server-log` option is left out, logging will happen locally. The results can be found in the `mlruns`-subfolders or alternatively can be retrieved on a local mlflow-Server that can be opened with `mlflow ui`.
+### train_sklearn.py
+Training data is specified by `--data`. Experiment name must be provided with `--experiment`.
+
+During the training metrics, artifacts and models will be logged with mlflow. You can add a connection for mlflow server via the option `--server-log`. Parameters for the server must be specified in `.env`-File in root directory. See .envtemplate for required parameters. The `MLFLOW_S3_BUCKET`-variable is optional and specifies the artifact storage location. Note that the artifact storage location cannot be changed for already existing experiments. If the variable is not specified and the experiment does not exist yet, then the default artifact root from the server will be used.
+
+If the `--server-log` option is left out, logging will happen locally. The results can be found in the `mlruns`-subfolders or alternatively can be retrieved on a local mlflow-Server that can be opened with `mlflow ui` from command line (must be executed in the directory one level above the `mlruns`-folder).
 
 
 * (Hyper-)parameters need to be set in `examples/train/params.yaml`. 
