@@ -142,7 +142,6 @@ def evaluate_model():
 def save_model(file_name):
     # https://onnx.ai/sklearn-onnx/
     initial_inputs = [('input', FloatTensorType([None, X_train.shape[1]]))]
-    #onx = convert_sklearn(model, initial_types=initial_inputs, target_opset=params["target_opset"], verbose=1)
     onx = to_onnx(model,
                   initial_types=initial_inputs,
                   target_opset=params["target_opset"],

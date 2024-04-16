@@ -31,7 +31,7 @@ def get_transform_observation(observation):
 
 @owlParser
 def mainLoop(args):
-    args = vars(args)
+    args = vars(args) # returns dict with {'var1': val1, 'var2', val2, ...}
 
     if "model" not in args.keys():
         print("error, model not selected")
@@ -87,6 +87,10 @@ def mainLoop(args):
 
         observation, reward, terminated, info = env.step(action)
         step = get_transform_observation(observation)
+
+        ### test
+        print(f"action: {str(action)}, step: {str(step)}")
+        ### \test
 
         # # check if stuck (model should learn this by itself)
         # if not env.is_moving():

@@ -41,6 +41,8 @@ class OwlracerPreprocessor(Dataset):
 
         # drop unused tables
         self.data.drop(drop_columns, axis=1, inplace=True)
+        # remaining columns:
+        # Velocity, Distance.Front, Distance.FrontLeft Distance.FrontRight, Distance.Left, Distance.Right, stepCommand
         self.data.drop(self.data.tail(1).index, inplace=True)
 
     def replace_stepcommand_labelmap(self, class2idx: dict):
