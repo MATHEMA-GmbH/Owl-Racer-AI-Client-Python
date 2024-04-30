@@ -7,3 +7,4 @@ grpcio
 grpcio_tools
 gym
 PyYaml
+./lib/

@@ -35,6 +35,7 @@ def racecardata_to_car(newCarData: core_pb2.RaceCarData, car: RaceCar = None):
     car.numRounds = newCarData.numRounds
     car.numCrashes = newCarData.numCrashes
     car.wrongDirection = newCarData.WrongDirection
+    # car.scoreChange = newCarData.scoreChange
 
     return car
 

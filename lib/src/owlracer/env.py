@@ -225,6 +225,7 @@ class CarEnv(gym.Env):
         distance_front_right = car.distance.frontRight
         distance_left = car.distance.left
         distance_right = car.distance.right
+        # scoreChange = car.scoreChange
         observation_data = np.array(
             [acceleration, velocity, distance_front, distance_front_left, distance_front_right, distance_left,
              distance_right], dtype=np.float32)

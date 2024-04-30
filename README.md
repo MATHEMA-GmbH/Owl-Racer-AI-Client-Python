@@ -81,3 +81,13 @@ necessary output nodes are:
 ## Executing Models
 
 ONNX-models can be executed with `examples/play/simpleML.py`. The model path is specified by `--model`. It is important to note that at the moment, the script can only handle ONNX-models which contain exactly one array of output probabilities and an arbitrary amount of other outputs of type `np.int64`. The script disregards all outputs of type `np.int64` and applies argmax to the array of output probabilities, thus extracting the command which should be executed by the model. This is done in order to ensure compatibility between models resulting from training with different packages, e.g. sklearn, pytorch, etc. The exact way in which this is done should maybe be updated in the future, when more types of models are added.
+
+## Commands
+
+* Idle = 0
+* Accelerate = 1
+* Decelerate = 2
+* AccelerateLeft = 3
+* AccelerateRight = 4
+* TurnLeft = 5
+* TurnRight = 6

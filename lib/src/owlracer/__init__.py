@@ -29,6 +29,8 @@ PARSER.add_argument('--carName',  type=str, default=None,
                     help='displayed name of the racecar')
 PARSER.add_argument('--model',  type=str, default=None,
                     help='chosen trained model')
+PARSER.add_argument('--gameTrack',  type=int, default=None,
+                    help='track number: 0,1,2')
 
 # Argparse Decorator
 def owlParser(func):
