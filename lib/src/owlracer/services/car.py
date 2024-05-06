@@ -171,3 +171,10 @@ class RaceCar:
     def scoreChange(self, value):
         self._scoreChange = value
 
+    @property
+    def wrongDirection(self):
+        return self._wrongDirection
+
+    @wrongDirection.setter
+    def wrongDirection(self, value):
+        self._wrongDirection = value
