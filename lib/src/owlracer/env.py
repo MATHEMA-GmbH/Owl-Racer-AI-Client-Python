@@ -26,7 +26,7 @@ class CarEnv(gym.Env):
 
     def __init__(self, channel=None, ip='localhost', port='6003', spectator=False, carName="Default",
                  carColor="#008800", sessionName="",
-                 gameTime=50, gameTrack=2, session=None):
+                 gameTime=50, gameTrack=2, session=None, actionChoice="argmax"):
         super(CarEnv, self).__init__()
         """Environment class using openAI gym interface. This class connects
         the client with the grpc _service. Each object keeps their own connection
@@ -218,15 +218,16 @@ class CarEnv(gym.Env):
         return session
 
     def transform_car_object_to_observation_data(self, car):
-        acceleration = car.acceleration
-        velocity = car.velocity
+        # acceleration = car.acceleration
+        # velocity = car.velocity
         distance_front = car.distance.front
         distance_front_left = car.distance.frontLeft
         distance_front_right = car.distance.frontRight
         distance_left = car.distance.left
         distance_right = car.distance.right
-        # scoreChange = car.scoreChange
+        scoreChange = car.scoreChange
+        wrongDirection = car.wrongDirection
         observation_data = np.array(
-            [acceleration, velocity, distance_front, distance_front_left, distance_front_right, distance_left,
-             distance_right], dtype=np.float32)
+            [scoreChange, distance_front, distance_front_left, distance_front_right, distance_left,
+             distance_right, wrongDirection], dtype=np.float32)
         return observation_data

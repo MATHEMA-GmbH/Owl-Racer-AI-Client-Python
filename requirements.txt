@@ -1,0 +1,11 @@
+# python 3.11
+numpy==1.26.4
+pandas==2.2.1
+onnxruntime==1.17.1
+protobuf==4.25.3
+onnx==1.15.0
+grpcio==1.62.0
+grpcio-tools==1.62.0
+gym==0.26.2
+pyyaml==6.0.1
+./lib/

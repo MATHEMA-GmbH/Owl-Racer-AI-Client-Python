@@ -10,8 +10,8 @@ train-sklearn:
   #target_opset: 16
 
 train-pytorch:
-#  model_type: NN
-  model_type: ResNet
+  model_type: NN
+#  model_type: ResNet
   batch_size: 16
   learning_rate: 1e-6
   epochs: 3

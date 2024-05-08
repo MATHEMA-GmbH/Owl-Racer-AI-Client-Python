@@ -34,7 +34,7 @@ def parse_args():
     args = parser.parse_args()
     return args
 
-def set_mlflow_tracking(experiment_name, server_log, logging_debug):
+def set_mlflow_tracking(experiment_name, server_log, logging_debug, drop_columns: list, used_columns: list, used_commands: list, replace_commands: dict):
 
     if server_log:
         # logging to server specified in .env
@@ -69,7 +69,11 @@ def set_mlflow_tracking(experiment_name, server_log, logging_debug):
 
     mlflow.set_tag("repository", os.getenv("MLFLOW_PROJECT_ENV"))
     mlflow.log_params(params)
-    # mlflow.log_param("target_opset", params["target_opset"])
+    mlflow.log_param("target_opset", params["target_opset"])
+    mlflow.log_param("drop columns", drop_columns)
+    mlflow.log_param("used columns", used_columns)
+    mlflow.log_param("used commands", used_commands)
+    mlflow.log_param("replace commands", replace_commands)
     mlflow.log_dict(class2idx, "labelmap-class2idx.yaml")
 
     print(f"mlflow artifact uri: {mlflow.get_artifact_uri()}")
@@ -79,10 +83,11 @@ def set_mlflow_tracking(experiment_name, server_log, logging_debug):
         logging.getLogger("mlflow").setLevel(logging.DEBUG)
 
 
-def get_features():
+def get_features(drop_columns: list = None, replace_commands = None):
     preprocessor = OwlracerPreprocessor(data_path=data_path)
     preprocessor.clean_crashes()
-    preprocessor.change_datatype()
+    preprocessor.clean_prestart_data()
+    [used_columns, used_commands, replace_commands] = preprocessor.change_datatype(drop_columns=drop_columns, replace_commands=replace_commands)
     preprocessor.replace_stepcommand_labelmap(class2idx=class2idx)
     preprocessor.train_test_split()
 
@@ -94,7 +99,7 @@ def get_features():
     training_data = OwlracerDataset(X=X_train, Y=Y_train)
     testing_data = OwlracerDataset(X=X_test, Y=Y_test)
 
-    return training_data, testing_data, preprocessor.Y_test
+    return used_columns, used_commands, replace_commands, training_data, testing_data, preprocessor.Y_test
 
 
 def mainLoop():
@@ -217,10 +222,16 @@ if __name__ == '__main__':
         sys.stderr.write("\tpython src/train_pytorch.py\n")
         sys.exit(1)
 
-    set_mlflow_tracking(experiment_name=args.experiment, server_log=args.server_log, logging_debug=args.logging_debug)
+    drop_columns = ["Time", "Id", "IsCrashed", "MaxVelocity", "Position.X", "Position.Y",
+                    "Checkpoint", "Rotation", "ScoreStep", "ScoreOverall", "Ticks",
+                    "Velocity"]
+    replace_commands = {0: 1, 2: 1}
+
+    used_columns, used_commands, replace_commands, training_data, testing_data, y_test = get_features(drop_columns=drop_columns, replace_commands=replace_commands)
+
+    set_mlflow_tracking(experiment_name=args.experiment, server_log=args.server_log, logging_debug=args.logging_debug, drop_columns=drop_columns, used_columns=used_columns, used_commands=used_commands, replace_commands=replace_commands)
     os.makedirs("train_pytorch_results", exist_ok=True)
 
-    training_data, testing_data, y_test = get_features()
     train_loader = DataLoader(training_data, batch_size=batch_size)
     test_loader = DataLoader(testing_data)
 

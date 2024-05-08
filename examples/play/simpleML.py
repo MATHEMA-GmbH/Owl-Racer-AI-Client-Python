@@ -26,7 +26,14 @@ def get_action(action):
 
 
 def get_transform_observation(observation):
-    return {'input': [observation[1:]]}
+    # do normalization; must be the same as in change_datatype of OwlracerPreprocessor-class
+    # observation-format: [ScoreChange, Distance.Front, ..., Distance.Right, WrongDirection ]
+    return_list = []
+    return_list.append(observation[0]/10)
+    for i in range(5):
+        return_list.append(observation[i+1]/1000)
+    return_list.append(observation[6])
+    return {'input': [return_list]}
 
 
 @owlParser
@@ -83,19 +90,25 @@ def mainLoop(args):
 
         action = session.run(None, step)
         action = get_action(action)
-        action = idx2class[np.argmax(action)]
+
+        print(f"action probabilities: {action}")
+
+        if args["actionChoice"] == "argmax":
+            action = np.argmax(action)
+        elif args["actionChoice"] == "probabilities":
+            action = np.random.choice([i for i in range(len(action[0]))], p=action[0])
+        else:
+            print("error, actionChoice not valid")
+            sys.exit(1)
+
+        action = idx2class[action]
 
         observation, reward, terminated, info = env.step(action)
         step = get_transform_observation(observation)
 
-        ### test
-        print(f"action: {str(action)}, step: {str(step)}")
-        ### \test
-
         # # check if stuck (model should learn this by itself)
         # if not env.is_moving():
         #     env.step(Command.accelerate)
-
 
 if __name__ == '__main__':
     mainLoop()

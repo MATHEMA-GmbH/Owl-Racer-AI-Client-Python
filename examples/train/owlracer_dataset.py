@@ -28,20 +28,45 @@ class OwlracerPreprocessor(Dataset):
 
         self.data["IsCrashed"] = result
         self.data = self.data.loc[self.data["IsCrashed"] != True]
-        self.data = self.data.loc[self.data["stepCommand"] != 0]
 
-    def change_datatype(self, drop_columns: list = None):
+    def clean_prestart_data(self):
+        # delete rows where game has not started yet
+        self.data = self.data[self.data["ScoreStep"] != 0]
+
+    def change_datatype(self, drop_columns: list = None, replace_commands: dict = None) -> list[list, list, dict]:
         # change datatype
         if drop_columns is None:
-            drop_columns = ["Id", "IsCrashed", "MaxVelocity", "Position.X", "Position.Y",
-                            "PreviousCheckpoint", "Rotation", "Score", "ScoreOverall", "Ticks"]
-        # self.data["Velocity"].replace(",", ".", inplace=True, regex=True)
+            drop_columns = ["Time", "Id", "IsCrashed", "MaxVelocity", "Position.X", "Position.Y",
+                            "Checkpoint", "Rotation", "ScoreStep", "ScoreOverall", "Ticks",
+                            "Velocity"]
         self.data["Velocity"] = self.data["Velocity"].replace(",", ".", regex=True)
         self.data["Velocity"] = pd.to_numeric(self.data["Velocity"])
+
+        ### dev
+        used_commands = [0,1,2,3,4,5,6]
+        if replace_commands != None:
+            used_commands = used_commands - replace_commands.keys()
+        self.data["stepCommand"].replace(replace_commands, inplace=True)
+        # self.data["stepCommand"].replace(3, 5, inplace=True)
+        # self.data["stepCommand"].replace(4, 6, inplace=True)
+        # for i in [0,2]:
+        #     self.data.drop(self.data[self.data["stepCommand"] == i].index, inplace=True)
+        ### \dev
 
         # drop unused tables
         self.data.drop(drop_columns, axis=1, inplace=True)
         self.data.drop(self.data.tail(1).index, inplace=True)
+
+        # normalization
+        for distance_name in ["Distance.Front", "Distance.FrontLeft", "Distance.FrontRight", "Distance.Left", "Distance.Right"]:
+            if distance_name in self.data.columns:
+                self.data[distance_name] = self.data[distance_name].apply(lambda x: x/1000)
+        if "ScoreChange" in self.data.columns:
+            self.data["ScoreChange"] = self.data["ScoreChange"].apply(lambda x: x/10)
+        if "WrongDirection" in self.data.columns:
+            self.data["WrongDirection"] = self.data["WrongDirection"].astype(int)
+
+        return [list(self.data.columns.values), used_commands, replace_commands]
 
     def replace_stepcommand_labelmap(self, class2idx: dict):
         self.data["stepCommand"] = self.data["stepCommand"].replace(class2idx)

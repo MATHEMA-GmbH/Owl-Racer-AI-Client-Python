@@ -11,9 +11,7 @@ PyYaml
 
 scikit-learn
 skl2onnx
-#tune-sklearn
 ray
-#ray[tune]
 torch
 ConfigSpace
 mlflow
@@ -22,6 +20,5 @@ boto3
 pydantic-settings
 dvc
 seaborn
-#sclblonnx
 keras
 keras-rl2
