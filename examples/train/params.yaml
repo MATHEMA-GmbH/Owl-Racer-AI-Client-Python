@@ -1,6 +1,6 @@
 train-sklearn:
-  classifier: RandomForestClassifier
-#  classifier: DecisionTreeClassifier
+  model_type: RandomForestClassifier
+#  model_type: DecisionTreeClassifier
   parameters:
     criterion: entropy
     max_depth: 600

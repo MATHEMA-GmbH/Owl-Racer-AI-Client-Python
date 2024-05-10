@@ -1,0 +1,15 @@
+used_columns: ["ScoreChange",
+               "Distance.Front",
+               "Distance.FrontRight",
+               "Distance.FrontLeft",
+               "Distance.Left",
+               "Distance.Right",
+               "WrongDirection"]
+
+used_commands: [1,3,4,5,6]
+
+# replace_commands will only be used if --replace_commands is set
+# as a parameter during training
+replace_commands:
+  0: 1
+  2: 1

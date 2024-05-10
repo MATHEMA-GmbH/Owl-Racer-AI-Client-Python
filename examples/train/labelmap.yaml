@@ -1,24 +1,13 @@
-# Available commands:
-# 0: Idle
-# 1: Accelerate
-# 2: Decelerate
-# 3: AccelerateLeft
-# 4: AccelerateRight
-# 5: TurnLeft
-# 6: TurnRight
-
+# idx2class is automatically derived from class2idx. Only edit class2idx.
 class2idx:
-    1: 0 # Accelerate
-    3: 1 # AccelerateLeft
-    4: 2 # AccelerateRight
-    5: 3 # TurnLeft
-    6: 4 # TurnRight
-
-#class2idx:
-#    0: 0 # Idle
-#    1: 1 # Accelerate
-#    2: 2 # Decelerate
-#    3: 3 # AccelerateLeft
-#    4: 4 # AccelerateRight
-#    5: 5 # TurnLeft
-#    6: 6 # TurnRight
+  1: 0
+  3: 1
+  4: 2
+  5: 3
+  6: 4
+idx2class:
+  0: 1
+  1: 3
+  2: 4
+  3: 5
+  4: 6

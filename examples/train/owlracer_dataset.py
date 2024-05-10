@@ -33,29 +33,28 @@ class OwlracerPreprocessor(Dataset):
         # delete rows where game has not started yet
         self.data = self.data[self.data["ScoreStep"] != 0]
 
-    def change_datatype(self, drop_columns: list = None, replace_commands: dict = None) -> list[list, list, dict]:
+    def change_commands(self, datachange, replace_commands):
+        if replace_commands == True:
+            self.data["stepCommand"] = self.data["stepCommand"].replace(datachange["replace_commands"])
+        else:
+            # only keep rows if the respective command should be used for training
+            commands = self.data["stepCommand"].drop_duplicates().to_list()
+            drop_commands = [x for x in commands if x not in datachange["used_commands"]]
+            for k in drop_commands:
+                self.data = self.data[self.data["stepCommand"] != k]
+
+
+    def change_datatype(self, used_columns):
         # change datatype
-        if drop_columns is None:
-            drop_columns = ["Time", "Id", "IsCrashed", "MaxVelocity", "Position.X", "Position.Y",
-                            "Checkpoint", "Rotation", "ScoreStep", "ScoreOverall", "Ticks",
-                            "Velocity"]
         self.data["Velocity"] = self.data["Velocity"].replace(",", ".", regex=True)
         self.data["Velocity"] = pd.to_numeric(self.data["Velocity"])
 
-        ### dev
-        used_commands = [0,1,2,3,4,5,6]
-        if replace_commands != None:
-            used_commands = used_commands - replace_commands.keys()
-        self.data["stepCommand"].replace(replace_commands, inplace=True)
-        # self.data["stepCommand"].replace(3, 5, inplace=True)
-        # self.data["stepCommand"].replace(4, 6, inplace=True)
-        # for i in [0,2]:
-        #     self.data.drop(self.data[self.data["stepCommand"] == i].index, inplace=True)
-        ### \dev
+        columns = list(self.data.columns.values)
+        drop_columns = [x for x in columns if (x not in used_columns) and (x != "stepCommand")]
 
         # drop unused tables
-        self.data.drop(drop_columns, axis=1, inplace=True)
-        self.data.drop(self.data.tail(1).index, inplace=True)
+        self.data = self.data.drop(drop_columns, axis=1)
+        self.data = self.data.drop(self.data.tail(1).index)
 
         # normalization
         for distance_name in ["Distance.Front", "Distance.FrontLeft", "Distance.FrontRight", "Distance.Left", "Distance.Right"]:
@@ -65,8 +64,6 @@ class OwlracerPreprocessor(Dataset):
             self.data["ScoreChange"] = self.data["ScoreChange"].apply(lambda x: x/10)
         if "WrongDirection" in self.data.columns:
             self.data["WrongDirection"] = self.data["WrongDirection"].astype(int)
-
-        return [list(self.data.columns.values), used_commands, replace_commands]
 
     def replace_stepcommand_labelmap(self, class2idx: dict):
         self.data["stepCommand"] = self.data["stepCommand"].replace(class2idx)
