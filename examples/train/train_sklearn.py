@@ -10,7 +10,11 @@ from skl2onnx import convert_sklearn, to_onnx
 from skl2onnx.common.data_types import FloatTensorType, Int64TensorType
 import mlflow
 
-from shared_train_functions import parse_args, set_mlflow_tracking, get_features, get_labelmap, get_datachange
+from shared import (parse_args,
+                    set_mlflow_tracking,
+                    get_features,
+                    generate_labelmap,
+                    get_model_config)
 
 # @mlflow_mixin
 def fit_model(model):
@@ -51,7 +55,7 @@ def train_random_forest():
 def evaluate_model():
     mlflow.sklearn.eval_and_log_metrics(model=model, X=X_test, y_true=Y_test, prefix=f"test_")
 
-    idx2class = {v: k for k, v in class2idx.items()}
+    idx2class = {v: k for k, v in labelmap["class2idx"].items()}
     preds = model.predict(X_test)
     preds = [idx2class[pred] for pred in preds]
 
@@ -69,7 +73,7 @@ def save_model(file_name):
                   target_opset=params["target_opset"],
                   options={id(model): {'zipmap': False}},
                   final_types=[('output_label', Int64TensorType([None])),
-                               ('output_probability', FloatTensorType([None, len(class2idx)]))])
+                               ('output_probability', FloatTensorType([None, len(labelmap["class2idx"])]))])
 
     mlflow.onnx.log_model(onnx_model=onx, artifact_path=f"{file_name}.onnx")
 
@@ -80,13 +84,10 @@ if __name__ == '__main__':
     args = parse_args()
     data_path = args.data
 
-    labelmap = get_labelmap("examples/train/labelmap.yaml")
-    class2idx = labelmap["class2idx"]
     params = yaml.safe_load(open("examples/train/params.yaml"))["train-sklearn"]
     parameters = params["parameters"]
 
-    datachange = get_datachange("examples/train/datachange.yaml")
-    replace_commands = args.replace_commands
+    model_config = get_model_config("examples/train/model_config.yaml")
 
     classifier_list = ["DecisionTreeClassifier", "RandomForestClassifier"]
     model_type = params["model_type"]
@@ -97,11 +98,13 @@ if __name__ == '__main__':
     # --- \ ----
 
     # --- ---
+    labelmap = generate_labelmap(labelmap_path="examples/train/labelmap.yaml",
+                                 change_commands=model_config["change_commands"])
+
     X_train, X_test, Y_train, Y_test = (
         get_features(data_path=data_path,
-                     class2idx=class2idx,
-                     datachange=datachange,
-                     replace_commands=args.replace_commands))
+                     class2idx=labelmap["class2idx"],
+                     model_config=model_config))
     # --- \ ---
 
     # --- Here the parameters for the tracking are set and the tracking is started ---
@@ -110,8 +113,7 @@ if __name__ == '__main__':
                         data_path=data_path,
                         params=params,
                         labelmap=labelmap,
-                        datachange=datachange,
-                        replace_commands=replace_commands,
+                        model_config=model_config,
                         server_log=args.server_log,
                         logging_debug=args.logging_debug)
     # --- \ ---

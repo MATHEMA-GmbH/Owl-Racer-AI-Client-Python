@@ -1,13 +1,12 @@
 train-sklearn:
-  model_type: RandomForestClassifier
-#  model_type: DecisionTreeClassifier
+#  model_type: RandomForestClassifier
+  model_type: DecisionTreeClassifier
   parameters:
     criterion: entropy
     max_depth: 600
     min_samples_split: 5
     max_features: log2
   target_opset: 19
-  #target_opset: 16
 
 train-pytorch:
   model_type: NN
@@ -18,6 +17,3 @@ train-pytorch:
   target_opset: 19
   in_channels: 16
   out_channels: 16
-
-hyperopt:
-  target_opset: 19

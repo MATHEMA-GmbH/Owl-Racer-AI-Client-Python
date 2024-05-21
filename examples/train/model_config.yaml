@@ -1,0 +1,39 @@
+# Available features: IsCrashed, MaxVelocity, Position.X, Position.Y, Checkpoint, Rotation,
+#                     ScoreStep, ScoreOverall, ScoreChange, Ticks, Velocity, Distance.Front, Distance.FrontLeft,
+#                     Distance.FrontRight, Distance.Left, Distance.Right, WrongDirection
+features:
+  used_features:
+    - Velocity
+    - Distance.Front
+    - Distance.FrontLeft
+    - Distance.FrontRight
+    - Distance.Left
+    - Distance.Right
+  normalization_constants:
+    Distance.Front: 0.001 # MaxViewDistance in Owlracer-Server is 1000
+    Distance.FrontLeft: 0.001
+    Distance.FrontRight: 0.001
+    Distance.Left: 0.001
+    Distance.Right: 0.001
+    ScoreChange: 0.1 # ScoreChange takes values in {-10,-9,...,9,10}
+    WrongDirection: 1 # WrongDirection is True or False, thus multiyplying by 1 converts it into 1 or 0.
+
+# The key change_commands specifies which commands shall be used and how the unused commands should be handled.
+# Available commands:
+# Idle = 0, Accelerate = 1, Decelerate = 2, AccelerateLeft = 3, AccelerateRight = 4, TurnLeft = 5, TurnRight = 6
+# The key drop_commands specifies which commands shall be discarded.
+# If no commands shall be discarded, leave the drop_commands key empty.
+# If the key replace_commands is set, commands will be replaced as specified.
+# Format is x: y --> x gets replaced with y.
+# If no commands shall be replaced, leave the replace_commands.commands key empty.
+# The key replace_commands.before_training specifies if commands are replaced before training or after training, i.e. during execution of the model
+change_commands:
+  drop_commands:
+#    - 0
+    - 2
+  replace_commands:
+    commands:
+#      0: 1
+#      2: 1
+    before_training: False
+

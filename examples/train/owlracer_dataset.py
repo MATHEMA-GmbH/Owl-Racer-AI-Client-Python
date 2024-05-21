@@ -33,37 +33,32 @@ class OwlracerPreprocessor(Dataset):
         # delete rows where game has not started yet
         self.data = self.data[self.data["ScoreStep"] != 0]
 
-    def change_commands(self, datachange, replace_commands):
-        if replace_commands == True:
-            self.data["stepCommand"] = self.data["stepCommand"].replace(datachange["replace_commands"])
-        else:
-            # only keep rows if the respective command should be used for training
-            commands = self.data["stepCommand"].drop_duplicates().to_list()
-            drop_commands = [x for x in commands if x not in datachange["used_commands"]]
-            for k in drop_commands:
-                self.data = self.data[self.data["stepCommand"] != k]
+    def replace_commands(self, command_replacement):
+        self.data["stepCommand"] = self.data["stepCommand"].replace(command_replacement)
+
+    def drop_unused_commands(self, drop_commands):
+        # only keep rows if the respective command should be used for training
+        for k in drop_commands:
+            self.data = self.data[self.data["stepCommand"] != k]
 
 
-    def change_datatype(self, used_columns):
-        # change datatype
+    def change_datatype(self, used_features, normalization_constants):
+        # formatting velocity feature
         self.data["Velocity"] = self.data["Velocity"].replace(",", ".", regex=True)
         self.data["Velocity"] = pd.to_numeric(self.data["Velocity"])
 
-        columns = list(self.data.columns.values)
-        drop_columns = [x for x in columns if (x not in used_columns) and (x != "stepCommand")]
+        features = list(self.data.columns.values)
+        # get features that shall not be used for training
+        drop_features = [x for x in features if (x not in used_features) and (x != "stepCommand")]
 
         # drop unused tables
-        self.data = self.data.drop(drop_columns, axis=1)
+        self.data = self.data.drop(drop_features, axis=1)
         self.data = self.data.drop(self.data.tail(1).index)
 
         # normalization
-        for distance_name in ["Distance.Front", "Distance.FrontLeft", "Distance.FrontRight", "Distance.Left", "Distance.Right"]:
-            if distance_name in self.data.columns:
-                self.data[distance_name] = self.data[distance_name].apply(lambda x: x/1000)
-        if "ScoreChange" in self.data.columns:
-            self.data["ScoreChange"] = self.data["ScoreChange"].apply(lambda x: x/10)
-        if "WrongDirection" in self.data.columns:
-            self.data["WrongDirection"] = self.data["WrongDirection"].astype(int)
+        for feature_name, normalization_constant in normalization_constants.items():
+            if feature_name in self.data.columns:
+                self.data[feature_name] = self.data[feature_name].apply(lambda x: x*normalization_constant)
 
     def replace_stepcommand_labelmap(self, class2idx: dict):
         self.data["stepCommand"] = self.data["stepCommand"].replace(class2idx)
