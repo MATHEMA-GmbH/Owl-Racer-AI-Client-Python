@@ -119,7 +119,9 @@ ONNX-models can be executed with `examples/play/simpleML.py`. The model path is 
 * The `model_config.yaml` with which the model was trained;
 * The `labelmap.yaml` which was automatically generated during training of the model.
 
-Note that all of these files are logged via mlflow.
+In the case of pytorch-Models, there is an additional file needed: During training with pytorch, a file with the same name as the run ID is generated. This file is also needed when executing the model. For an example, see the folder structure of `trainedModels/NN/`. 
+
+Note that all of the files mentioned above are logged via mlflow.
 
 It is important to note that at the moment, the script can only handle ONNX-models which contain exactly one array of output probabilities and an arbitrary amount of other outputs of type `np.int64`. The script disregards all outputs of type `np.int64`.
 
