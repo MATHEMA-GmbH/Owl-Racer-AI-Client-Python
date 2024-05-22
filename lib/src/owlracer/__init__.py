@@ -29,6 +29,10 @@ PARSER.add_argument('--carName',  type=str, default=None,
                     help='displayed name of the racecar')
 PARSER.add_argument('--model',  type=str, default=None,
                     help='chosen trained model')
+PARSER.add_argument('--gameTrack',  type=int, default=None,
+                    help='track number: 0,1,2')
+PARSER.add_argument("--actionChoice", type=str, default="argmax",
+                    help="Specifies how the model chooses its next action. Possible values: \"argmax\", \"possibilities\".")
 
 # Argparse Decorator
 def owlParser(func):

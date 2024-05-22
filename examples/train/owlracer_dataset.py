@@ -28,22 +28,40 @@ class OwlracerPreprocessor(Dataset):
 
         self.data["IsCrashed"] = result
         self.data = self.data.loc[self.data["IsCrashed"] != True]
-        self.data = self.data.loc[self.data["stepCommand"] != 0]
 
-    def change_datatype(self, drop_columns: list = None):
-        # change datatype
-        if drop_columns is None:
-            drop_columns = ["Id", "IsCrashed", "MaxVelocity", "Position.X", "Position.Y",
-                            "PreviousCheckpoint", "Rotation", "Score", "ScoreOverall", "Ticks"]
-        self.data["Velocity"].replace(",", ".", inplace=True, regex=True)
+    def clean_prestart_data(self):
+        # delete rows where game has not started yet
+        self.data = self.data[self.data["ScoreStep"] != 0]
+
+    def replace_commands(self, command_replacement):
+        self.data["stepCommand"] = self.data["stepCommand"].replace(command_replacement)
+
+    def drop_unused_commands(self, drop_commands):
+        # only keep rows if the respective command should be used for training
+        for k in drop_commands:
+            self.data = self.data[self.data["stepCommand"] != k]
+
+
+    def change_datatype(self, used_features, normalization_constants):
+        # formatting velocity feature
+        self.data["Velocity"] = self.data["Velocity"].replace(",", ".", regex=True)
         self.data["Velocity"] = pd.to_numeric(self.data["Velocity"])
 
+        features = list(self.data.columns.values)
+        # get features that shall not be used for training
+        drop_features = [x for x in features if (x not in used_features) and (x != "stepCommand")]
+
         # drop unused tables
-        self.data.drop(drop_columns, axis=1, inplace=True)
-        self.data.drop(self.data.tail(1).index, inplace=True)
+        self.data = self.data.drop(drop_features, axis=1)
+        self.data = self.data.drop(self.data.tail(1).index)
+
+        # normalization
+        for feature_name, normalization_constant in normalization_constants.items():
+            if feature_name in self.data.columns:
+                self.data[feature_name] = self.data[feature_name].apply(lambda x: x*normalization_constant)
 
     def replace_stepcommand_labelmap(self, class2idx: dict):
-        self.data["stepCommand"].replace(class2idx, inplace=True)
+        self.data["stepCommand"] = self.data["stepCommand"].replace(class2idx)
 
     def train_test_split(self, fixed_random_state: int = 444, test_size: float = 0.3):
         # generate data X and labels y

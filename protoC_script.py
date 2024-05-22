@@ -21,9 +21,13 @@ def main(arguments):
     config_folder = os.sep + "lib" + os.sep + "src" + os.sep + "owlracer"
     
 
-    # Because of cmd input the strings are in neet 
-    #var = "python3 -m grpc_tools.protoc " + "-I " + src_dir + os.sep + "Protobuf " + src_dir + os.sep + "Protobuf" + os.sep + "matlabs.owlracer.core.proto " + "--python_out=" + current_dir + " --grpc_python_out=" + current_dir
-    
+    # Because of cmd input the strings are in need
+    var = "python -m grpc_tools.protoc " + "-I " + src_dir + os.sep + "Protobuf " + src_dir + os.sep + "Protobuf" + os.sep + "matlabs.owlracer.core.proto " + "--python_out=" + current_dir + " --grpc_python_out=" + current_dir
+
+    ### test ###
+    testVar1 = "python -m grpc_tools.protoc " + "-I " + src_dir + os.sep + "Protobuf " + src_dir + os.sep + "Protobuf" + os.sep + "matlabs.owlracer.core.proto " + "--python_out=" + current_dir + config_folder + " --grpc_python_out=" + current_dir + config_folder
+    ############
+
     os.system(
         "python -m grpc_tools.protoc "
         "-I " + src_dir + os.sep + "Protobuf " +
@@ -31,7 +35,6 @@ def main(arguments):
         "--python_out=" + current_dir + config_folder +
         " --grpc_python_out=" + current_dir + config_folder)
 
-    
     #Rename the exported file to the right format
 
     renamed_grpc_file = current_dir + config_folder + os.sep + "core_pb2_grpc.py"
@@ -50,6 +53,7 @@ def main(arguments):
         print(ex)
 
     #change dir and build pack
+
     os.chdir('./lib')
     os.system("python -m build")
     os.chdir('../')

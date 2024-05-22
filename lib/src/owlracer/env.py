@@ -26,7 +26,7 @@ class CarEnv(gym.Env):
 
     def __init__(self, channel=None, ip='localhost', port='6003', spectator=False, carName="Default",
                  carColor="#008800", sessionName="",
-                 gameTime=50, gameTrack=2, session=None):
+                 gameTime=50, gameTrack=2, session=None, actionChoice="argmax"):
         super(CarEnv, self).__init__()
         """Environment class using openAI gym interface. This class connects
         the client with the grpc _service. Each object keeps their own connection
@@ -217,15 +217,23 @@ class CarEnv(gym.Env):
         self.Connector.session = session
         return session
 
-    def transform_car_object_to_observation_data(self, car):
-        acceleration = car.acceleration
-        velocity = car.velocity
-        distance_front = car.distance.front
-        distance_front_left = car.distance.frontLeft
-        distance_front_right = car.distance.frontRight
-        distance_left = car.distance.left
-        distance_right = car.distance.right
-        observation_data = np.array(
-            [acceleration, velocity, distance_front, distance_front_left, distance_front_right, distance_left,
-             distance_right], dtype=np.float32)
-        return observation_data
+    def transform_car_object_to_observation_data(self, car) -> dict:
+        return {
+            "IsCrashed": car.isCrashed,
+            "MaxVelocity": car.maxVelocity,
+            "Position.X": car.position.x,
+            "Position.Y": car.position.y,
+            "Checkpoint": car.checkPoint,
+            "Rotation": car.rotation,
+            "ScoreStep": car.scoreStep,
+            "ScoreOverall": car.scoreOverall,
+            "ScoreChange": car.scoreChange,
+            "Ticks": car.ticks,
+            "Velocity": car.velocity,
+            "Distance.Front": car.distance.front,
+            "Distance.FrontLeft": car.distance.frontLeft,
+            "Distance.FrontRight": car.distance.frontRight,
+            "Distance.Left": car.distance.left,
+            "Distance.Right": car.distance.right,
+            "WrongDirection": car.wrongDirection
+        }

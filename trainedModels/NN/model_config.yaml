@@ -1,0 +1,22 @@
+change_commands:
+  drop_commands:
+  - 2
+  replace_commands:
+    before_training: false
+    commands: null
+features:
+  normalization_constants:
+    Distance.Front: 0.001
+    Distance.FrontLeft: 0.001
+    Distance.FrontRight: 0.001
+    Distance.Left: 0.001
+    Distance.Right: 0.001
+    ScoreChange: 0.1
+    WrongDirection: 1
+  used_features:
+  - Velocity
+  - Distance.Front
+  - Distance.FrontLeft
+  - Distance.FrontRight
+  - Distance.Left
+  - Distance.Right

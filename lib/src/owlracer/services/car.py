@@ -11,7 +11,7 @@ class RaceCar:
                  acceleration=0.0, velocity=0.0, isCrashed=False, scoreStep=0, scoreOverall=0, ticks=0,
                  distance=pd.DataFrame({"front":[0], "frontLeft":[0], "frontRight":[0], "left":[0], "right":[0],
                                         "maxViewDistance":[0]}),
-                 checkPoint=0, lastStepCommand=0, name="", numRounds=0, numCrashes=0, wrongDirection=False):
+                 checkPoint=0, lastStepCommand=0, name="", numRounds=0, numCrashes=0, wrongDirection=False, scoreChange=0):
         """
         Class for wrapping the grpc class and provide a python nativ interface to the data.
         Check with the Protobuf file for definition of the parameters.
@@ -48,6 +48,7 @@ class RaceCar:
         self.numRounds = numRounds
         self.numCrashed = numCrashes
         self.wrongDirection = wrongDirection
+        self.scoreChange = scoreChange
 
     @property
     def ID(self):
@@ -162,4 +163,18 @@ class RaceCar:
     def lastStepCommand(self, value):
         self._lastStepCommand = value
 
+    @property
+    def scoreChange(self):
+        return self._scoreChange
 
+    @scoreChange.setter
+    def scoreChange(self, value):
+        self._scoreChange = value
+
+    @property
+    def wrongDirection(self):
+        return self._wrongDirection
+
+    @wrongDirection.setter
+    def wrongDirection(self, value):
+        self._wrongDirection = value

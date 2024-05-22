@@ -1,0 +1,10 @@
+numpy
+pandas
+onnxruntime
+protobuf
+onnx
+grpcio
+grpcio_tools
+gym
+PyYaml
+./lib/

@@ -1,6 +1,5 @@
 import os
 import sys
-import argparse
 import yaml
 
 from sklearn.metrics import confusion_matrix, classification_report
@@ -10,56 +9,20 @@ import torch
 from torch.utils.data import DataLoader
 import mlflow
 
-import sclblonnx as so
-import onnx
+from owlracer_dataset import OwlracerDataset
+from shared import (parse_args,
+                    set_mlflow_tracking,
+                    get_features,
+                    generate_labelmap,
+                    get_model_config)
 
-from owlracer_dataset import OwlracerDataset, OwlracerPreprocessor
 from ModelPytorch.NN import NeuralNetwork
 from ModelPytorch.ResNet import ResNet
 from ModelPytorch.Exporter import ExporterToOnnx
 
-
-def prase_args():
-    parser = argparse.ArgumentParser()
-    parser.add_argument("--data", type=str, help="set the path of the data", required=True)
-    parser.add_argument("--experiment", type=str, help="set mlflow experiment", required=True)
-    args = parser.parse_args()
-    return args
-
-
-def set_mlflow_tracking(experiment_name):
-    mlflow.set_experiment(experiment_name)
-    active_run = mlflow.start_run(run_name=model_type)
-    run_id = active_run.info.run_id
-    print(f"active mlflow run with id: {run_id}")
-
-    mlflow.set_tag("data_set", data_path)
-
-    mlflow.log_params(params)
-    mlflow.log_dict(class2idx, "labelmap-class2idx")
-
-
-def get_features():
-    preprocessor = OwlracerPreprocessor(data_path=data_path)
-    preprocessor.clean_crashes()
-    preprocessor.change_datatype()
-    preprocessor.replace_stepcommand_labelmap(class2idx=class2idx)
-    preprocessor.train_test_split()
-
-    X_train = preprocessor.X_train
-    X_test = preprocessor.X_test
-    Y_train = preprocessor.Y_train
-    Y_test = preprocessor.Y_test
-
-    training_data = OwlracerDataset(X=X_train, Y=Y_train)
-    testing_data = OwlracerDataset(X=X_test, Y=Y_test)
-
-    return training_data, testing_data, preprocessor.Y_test
-
-
 def mainLoop():
     if model_type == "NN":
-        model = NeuralNetwork()
+        model = NeuralNetwork(model_config, labelmap)
 
     elif model_type == "ResNet":
         model = ResNet(in_channels=params["in_channels"], out_channels=params["out_channels"])
@@ -83,7 +46,6 @@ def mainLoop():
     test_loop(test_loader, model, loss)
 
     save_model(model)
-    transform_onnx()
     mlflow.end_run()
 
 
@@ -118,7 +80,7 @@ def test_loop(dataloader, model, loss_fn):
     test_loss, correct = 0, 0
 
     y_pred_list = []
-    idx2class = {v: k for k, v in class2idx.items()}
+    idx2class = {v: k for k, v in labelmap["class2idx"].items()}
 
     with torch.no_grad():
         for X, y in dataloader:
@@ -158,32 +120,13 @@ def save_model(model):
     onx = exporter.export_to_onnx(model, next(iter(test_loader)), os.path.join("train_pytorch_results", f"{model_type}-original.onnx"), target_opset)
     mlflow.onnx.log_model(onnx_model=onx, artifact_path=f"{model_type}-original.onnx")
 
-
-def transform_onnx():
-    graph = so.graph_from_file(os.path.join("train_pytorch_results", f"{model_type}-original.onnx"))
-    # rename output to be like sklearn
-    so.output.rename_output(graph, "output", "output_probability")
-
-    # add node to add output_label
-    n1 = so.node('ArgMax',
-                 axis=1,
-                 keepdims=1,
-                 inputs=['output_probability'],
-                 outputs=['output_label'])
-    graph = so.add_node(graph, n1)
-    graph = so.add_output(graph, 'output_label', "INT64", [1, 1])
-    so.graph_to_file(graph, os.path.join("train_pytorch_results", f"{model_type}.onnx"))
-
-    onnx_model = onnx.load(os.path.join("train_pytorch_results", f"{model_type}.onnx"))
-    mlflow.onnx.log_model(onnx_model=onnx_model, artifact_path=f"{model_type}.onnx")
-
-
 if __name__ == '__main__':
-    args = prase_args()
+    args = parse_args()
     data_path = args.data
 
-    class2idx = yaml.safe_load(open("examples/train/labelmap.yaml"))["class2idx"]
+    model_config = get_model_config("examples/train/model_config.yaml")
     params = yaml.safe_load(open("examples/train/params.yaml"))["train-pytorch"]
+
     batch_size = params["batch_size"]
     learning_rate = float(params["learning_rate"])
     epochs = params["epochs"]
@@ -197,10 +140,33 @@ if __name__ == '__main__':
         sys.stderr.write("\tpython src/train_pytorch.py\n")
         sys.exit(1)
 
-    set_mlflow_tracking(experiment_name=args.experiment)
+    # --- ---
+    labelmap = generate_labelmap(labelmap_path="examples/train/labelmap.yaml",
+                                 change_commands=model_config["change_commands"])
+
+    X_train, X_test, Y_train, Y_test = (
+        get_features(data_path=data_path,
+                     class2idx=labelmap["class2idx"],
+                     model_config=model_config))
+    # --- \ ---
+
+    training_data = OwlracerDataset(X=X_train, Y=Y_train)
+    testing_data = OwlracerDataset(X=X_test, Y=Y_test)
+    y_test = Y_test
+
+    # --- Here the parameters for the tracking are set and the tracking is started ---
+    set_mlflow_tracking(experiment_name=args.experiment,
+                        model_type=model_type,
+                        data_path=data_path,
+                        params=params,
+                        labelmap=labelmap,
+                        model_config=model_config,
+                        server_log=args.server_log,
+                        logging_debug=args.logging_debug)
+    # --- \ ---
+
     os.makedirs("train_pytorch_results", exist_ok=True)
 
-    training_data, testing_data, y_test = get_features()
     train_loader = DataLoader(training_data, batch_size=batch_size)
     test_loader = DataLoader(testing_data)
 
